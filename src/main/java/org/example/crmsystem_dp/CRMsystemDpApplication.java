@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CrMsystemDpApplication {
+public class CRMsystemDpApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CrMsystemDpApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CRMsystemDpApplication.class, args);
+    }
 
 }
