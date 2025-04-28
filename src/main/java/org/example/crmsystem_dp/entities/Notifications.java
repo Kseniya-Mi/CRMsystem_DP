@@ -1,7 +1,6 @@
 package org.example.crmsystem_dp.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,11 +9,20 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
+@Table(name="notifications")
 public class Notifications {
 
     @Id
-    private int id;
-    private String massage;
-    private String date;
-    private int customer_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
+    @Column(nullable = false)
+    private String message;
+
+    @Column(nullable = false)
+    private boolean isRead;
 }

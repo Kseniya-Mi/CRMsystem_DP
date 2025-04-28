@@ -1,7 +1,6 @@
 package org.example.crmsystem_dp.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,13 +9,24 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
+@Table(name="orders")
 public class Orders {
 
     @Id
-    private int order_id;
-    private int customer_id;
-    private String tittle;
-    private int sum;
-    private String order_date;
-    private String status;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customers customer;
+
+    @ManyToOne
+    @JoinColumn(name = "executor_id", nullable = false)
+    private Executors executor;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String status; // Например, "В обработке", "Выполнен"
 }
