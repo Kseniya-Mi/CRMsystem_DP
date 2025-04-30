@@ -1,9 +1,7 @@
 package org.example.crmsystem_dp.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Getter
@@ -27,5 +25,17 @@ public class Customers {
 
     @Column(nullable = false)
     private String status; // Например, "Активный", "Неактивный"
+
+    public Customers() {}
+
+    public Customers(Long id, String name, String email, String phone, String status) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.status = status;
+    }
+
+
 
 }
