@@ -13,15 +13,15 @@ public class Users {
 
     @Id // Помечает поле как первичный ключ
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоинкремент для id
-    private int id;
+    private long id;
 
-    @Column// Поле не может быть null и должно быть уникальным
+    @Column(name="login")// Поле не может быть null и должно быть уникальным
     private String login;
 
-    @Column // Поле не может быть null
+    @Column(name="password") // Поле не может быть null
     private String password;
 
-    @Column
+    @Column(name="role")
     private String role;
 
     public Users(int id, String login, String password, String role) {

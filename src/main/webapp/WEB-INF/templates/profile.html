@@ -121,7 +121,7 @@
     <!-- Верхняя панель -->
     <div class="top-bar">
         <div>
-            <a href="/home">Главная страница</a>
+            <a href="/main">Главная страница</a>
             <a href="/profile">Профиль</a>
             <a href="/sales-analysis">Анализ продаж</a>
         </div>
@@ -129,9 +129,9 @@
 
     <!-- Приветствие и информация о пользователе -->
     <div class="welcome-section">
-        <h2 style="color: #4b0082;" th:text="'Добро пожаловать, ' + ${user.username} + '!'"></h2>
+        <h2 style="color: #4b0082;" th:text="'Добро пожаловать, ' + ${user.login} + '!'"></h2>
         <p><strong>Роль:</strong> <span th:text="${user.role}"></span></p>
-        <p><strong>Телефон:</strong> <span th:text="${user.phone}"></span></p>
+        <p><strong>Телефон:</strong> <span th:text="${user.password}"></span></p>
     </div>
 
     <!-- Воронка продаж -->

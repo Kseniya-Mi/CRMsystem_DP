@@ -61,11 +61,19 @@ public class UsersRepository implements DataAccessObject<Users> {
     @Override
     public Optional<Users> findByID(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(
+            Users user = jdbcTemplate.queryForObject(
                     "SELECT * FROM users WHERE id = ?",
-                    rowMapper,
+                    (rs, rowNum) -> {
+                        Users u = new Users();
+                        u.setId(rs.getLong("id"));
+                        u.setLogin(rs.getString("login"));
+                        u.setPassword(rs.getString("password"));
+                        u.setRole(rs.getString("role"));
+                        return u;
+                    },
                     id
-            ));
+            );
+            return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -83,12 +91,12 @@ public class UsersRepository implements DataAccessObject<Users> {
         }
     }
 
-    public Optional<Users> findByEmailAndPassword(String email, String password) {
+    public Optional<Users> findByLoginAndPassword(String login, String password) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    "SELECT * FROM users WHERE email = ? AND password = crypt(?, password)",
+                    "SELECT * FROM users WHERE login = ? AND password = ? LIMIT 1",
                     rowMapper,
-                    email,
+                    login,
                     password
             ));
         } catch (EmptyResultDataAccessException e) {
