@@ -5,6 +5,3 @@ CREATE TABLE IF NOT EXISTS users (
                        role VARCHAR(50) NOT NULL
 );
 
-INSERT INTO users (login, password, role)
-VALUES ('admin', 'admin123', 'ADMIN'),
-       ('user', 'user123', 'USER');

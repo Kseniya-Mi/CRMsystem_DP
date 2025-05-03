@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Добро пожаловать | CRM-mir</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #9c27b0;
+      --light-lavender: #e1bee7;
+      --pale-lavender: #f3e5f5;
+      --white: #ffffff;
+      --dark-purple: #7b1fa2;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--pale-lavender);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .welcome-container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(156, 39, 176, 0.1);
+    }
+
+    .welcome-header {
+      color: var(--dark-purple);
+      border-bottom: 2px solid var(--light-lavender);
+      padding-bottom: 10px;
+    }
+
+    .step-card {
+      border-left: 3px solid var(--primary-color);
+      background-color: var(--white);
+      transition: transform 0.3s;
+    }
+
+    .step-card:hover {
+      transform: translateX(5px);
+    }
+
+    .step-number {
+      background-color: var(--primary-color);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 1rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.5rem 1.5rem;
+    }
+
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5 flex-grow-1">
+  <div class="welcome-container">
+    <div class="text-center mb-5">
+      <h1 class="welcome-header">Добро пожаловать!</h1>
+      <p class="lead">Мы рады видеть вас в нашей системе. Давайте начнем!</p>
+    </div>
+
+    <div class="mb-5">
+      <h3 class="mb-4" style="color: var(--dark-purple);">Быстрый старт</h3>
+
+      <div class="step-card p-3 mb-3 d-flex align-items-center">
+        <div class="step-number">1</div>
+        <div>
+          <h5>Заполните профиль</h5>
+          <p class="mb-0">Добавьте основную информацию о себе для персонализации сервиса</p>
+        </div>
+      </div>
+
+      <div class="step-card p-3 mb-3 d-flex align-items-center">
+        <div class="step-number">2</div>
+        <div>
+          <h5>Изучите возможности</h5>
+          <p class="mb-0">Ознакомьтесь с основными функциями системы</p>
+        </div>
+      </div>
+
+      <div class="step-card p-3 mb-4 d-flex align-items-center">
+        <div class="step-number">3</div>
+        <div>
+          <h5>Начните работу</h5>
+          <p class="mb-0">Создайте свой первый проект или заказ</p>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a href="/login" class="btn btn-primary me-2">Перейти в профиль</a>
+        <a href="/about" class="btn btn-outline-primary">Возможности системы</a>
+      </div>
+    </div>
+
+    <div class="border-top pt-4">
+      <h3 class="mb-3" style="color: var(--dark-purple);">Полезные ресурсы</h3>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-0">
+            <div class="card-body">
+              <h5><i class="bi bi-question-circle text-primary me-2"></i> FAQ</h5>
+              <p>Ответы на часто задаваемые вопросы</p>
+              <a href="#" class="stretched-link"></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-0">
+            <div class="card-body">
+              <h5><i class="bi bi-book text-primary me-2"></i> Документация</h5>
+              <p>Подробное руководство пользователя</p>
+              <a href="#" class="stretched-link"></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card h-100 border-0">
+            <div class="card-body">
+              <h5><i class="bi bi-headset text-primary me-2"></i> Поддержка</h5>
+              <p>Свяжитесь с нашей службой поддержки</p>
+              <a href="#" class="stretched-link"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</body>
+</html>

@@ -24,9 +24,13 @@ public class Orders {
     @JoinColumn(name = "executor_id", nullable = false)
     private Executors executor;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private String status; // Например, "В обработке", "Выполнен"
+    @Column(name = "status", nullable = false)
+    private OrderStatus status = OrderStatus.NEW;
+
+    public enum OrderStatus {
+        NEW, IN_PROGRESS, COMPLETED, CANCELLED
+    }
 }
