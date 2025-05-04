@@ -85,7 +85,7 @@
         <!-- Боковая панель -->
         <div class="col-md-3 col-lg-2 d-md-block admin-sidebar py-3">
             <div class="text-center mb-4">
-                <h4 class="text-purple">Администратор</h4>
+                <h4 class="text-purple">Поставщик</h4>
             </div>
             <ul class="nav flex-column">
                 <li class="nav-item">
@@ -124,7 +124,7 @@
         <!-- Основное содержимое -->
         <main class="col-md-9 ms-sm-auto col-lg-10 admin-content">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-                <h1 class="admin-header">Административная панель</h1>
+                <h1 class="welcome-header">Добро пожаловать, <span th:text="${session.currentUser.name}"></span>!</h1>
             </div>
 
             <!-- Статистика -->

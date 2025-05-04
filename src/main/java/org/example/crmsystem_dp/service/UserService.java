@@ -29,4 +29,17 @@ public class UserService {
     public Optional<Users> authenticate(String login, String password) {
         return usersRepository.findByLoginAndPassword(login, password);
     }
+
+    public void registerUser(Users registrationDto) {
+
+        Users user = new Users();
+        user.setName(registrationDto.getName());
+        user.setEmail(registrationDto.getEmail());
+        user.setPhone(registrationDto.getPhone());
+        user.setLogin(registrationDto.getLogin());
+        user.setPassword(registrationDto.getPassword());
+        user.setRole(registrationDto.getRole());
+
+       usersRepository.save(user);
+    }
 }

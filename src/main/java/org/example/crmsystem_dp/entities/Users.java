@@ -15,6 +15,15 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоинкремент для id
     private long id;
 
+    @Column(name="name")
+    private String name;
+
+    @Column(name="email")
+    private String email;
+
+    @Column(name="phone")
+    private String phone;
+
     @Column(name="login")// Поле не может быть null и должно быть уникальным
     private String login;
 

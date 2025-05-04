@@ -18,7 +18,7 @@ public class OrderMapper implements RowMapper<Orders> {
         order.setCustomer(rs.getObject("customer_id", Customers.class));
         order.setExecutor(rs.getObject("executor_id", Executors.class));
         order.setDescription(rs.getString("description"));
-        order.setStatus(rs.getString("status"));
+        order.setStatus(rs.getObject("status", Orders.OrderStatus.class));
         return order;
     }
 }

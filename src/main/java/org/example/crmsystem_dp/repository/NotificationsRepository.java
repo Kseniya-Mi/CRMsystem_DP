@@ -1,6 +1,7 @@
 package org.example.crmsystem_dp.repository;
 
 import org.example.crmsystem_dp.entities.Notifications;
+import org.example.crmsystem_dp.entities.Users;
 import org.example.crmsystem_dp.interfaces.DataAccessObject;
 import org.example.crmsystem_dp.mappers.NotificationMapper;
 import org.springframework.beans.factory.annotation.Autowired;

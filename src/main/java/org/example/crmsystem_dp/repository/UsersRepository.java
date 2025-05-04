@@ -25,10 +25,13 @@ public class UsersRepository implements DataAccessObject<Users> {
     @Override
     public void save(Users user) {
         jdbcTemplate.update(
-                "INSERT INTO users (login, password, role) VALUES (?, crypt(?, gen_salt('md5')), ?)",
+                "INSERT INTO users (name, email, phone, role, login, password) VALUES (?,?,?,?,?, ?)",
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getRole(),
                 user.getLogin(),
-                user.getPassword(),
-                user.getRole()
+                user.getPassword()
         );
     }
 

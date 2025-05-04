@@ -1,5 +1,7 @@
 package org.example.crmsystem_dp.interfaces;
 
+import org.example.crmsystem_dp.entities.Users;
+
 import java.util.List;
 import java.util.Optional;
 

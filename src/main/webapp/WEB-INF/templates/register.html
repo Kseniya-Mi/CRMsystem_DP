@@ -114,9 +114,9 @@
 
         <form th:action="@{/register}" method="post" id="registrationForm">
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="firstName" name="firstName"
+                        <input type="text" class="form-control" id="name" name="name"
                                placeholder="Имя" required>
-                        <label for="firstName">Имя Фамилия</label>
+                        <label for="name">Имя Фамилия</label>
                     </div>
 
             <div class="form-floating mb-3">
@@ -187,9 +187,9 @@
             </script>
 
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="username" name="username"
+                <input type="text" class="form-control" id="login" name="login"
                        placeholder="Логин" required>
-                <label for="username">Логин</label>
+                <label for="login">Логин</label>
             </div>
 
             <div class="form-floating mb-3">
@@ -201,12 +201,6 @@
                     <div class="password-strength-bar" id="passwordStrengthBar"></div>
                 </div>
                 <small class="text-muted">Минимум 8 символов</small>
-            </div>
-
-            <div class="form-floating mb-4">
-                <input type="password" class="form-control" id="confirmPassword"
-                       placeholder="Подтверждение пароля" required>
-                <label for="confirmPassword">Подтверждение пароля</label>
             </div>
 
             <div class="d-grid mb-3">

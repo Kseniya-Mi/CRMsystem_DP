@@ -13,9 +13,13 @@ public class UserMapper implements RowMapper<Users> {
     public Users mapRow(ResultSet rs, int rowNum) throws SQLException {
         Users user = new Users();
         user.setId(rs.getInt("id"));
+        user.setName(rs.getString("name"));
+        user.setEmail(rs.getString("email"));
+        user.setPhone(rs.getString("phone"));
+        user.setRole(rs.getString("role"));
         user.setLogin(rs.getString("login"));
         user.setPassword(rs.getString("password")); // Внимание: пароль может быть зашифрован
-        user.setRole(rs.getString("role"));
+
         return user;
     }
 }
