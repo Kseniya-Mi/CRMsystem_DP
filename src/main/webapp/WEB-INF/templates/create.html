@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание заказа | CRM-mir</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #9c27b0;
+            --dark-purple: #7b1fa2;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .form-header {
+            color: var(--dark-purple);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        .invalid-feedback {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Основной контент -->
+<div class="container py-5">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="bi bi-file-earmark-plus me-2"></i>Создание нового заказа</h2>
+        </div>
+
+        <form th:action="@{/orders/create}" th:object="${order}" method="post" id="orderForm">
+            <!-- Клиент (ручной ввод ID) -->
+            <div class="mb-3">
+                <label for="customerId" class="form-label">ID клиента</label>
+                <input type="number" class="form-control" th:field="*{customer}" id="customerId" required
+                       min="1" step="1" placeholder="Введите ID клиента">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('customer')}"
+                     th:errors="*{customer}"></div>
+            </div>
+
+            <!-- Исполнитель (ручной ввод ID) -->
+            <div class="mb-3">
+                <label for="executorId" class="form-label">ID исполнителя</label>
+                <input type="number" class="form-control" th:field="*{executor}" id="executorId" required
+                       min="1" step="1" placeholder="Введите ID исполнителя">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('executor')}"
+                     th:errors="*{executor}"></div>
+            </div>
+
+            <!-- Описание -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание заказа</label>
+                <textarea class="form-control" th:field="*{description}" id="description"
+                          rows="4" required></textarea>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                     th:errors="*{description}"></div>
+            </div>
+
+            <!-- Статус -->
+            <div class="mb-3">
+                <label for="status" class="form-label">Статус</label>
+                <select class="form-select" id="statusFilter">
+                    <option value="">Все статусы</option>
+                    <option th:each="status : ${T(org.example.crmsystem_dp.entities.Orders.OrderStatus).values()}"
+                            th:value="${status}"
+                            th:text="${#strings.capitalize(#strings.replace(status.name(), '_', ' '))}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Дата -->
+            <div class="mb-3">
+                <label for="date" class="form-label">Дата выполнения</label>
+                <input type="date" class="form-control" th:field="*{date}" id="date" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('date')}"
+                     th:errors="*{date}"></div>
+            </div>
+
+            <!-- Сумма -->
+            <div class="mb-4">
+                <label for="sum" class="form-label">Сумма</label>
+                <input type="number" step="0.01" class="form-control" th:field="*{sum}" id="sum">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('sum')}"
+                     th:errors="*{sum}"></div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/orders}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Назад
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i> Создать заказ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Скрипты -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Валидация формы перед отправкой
+    document.getElementById('orderForm').addEventListener('submit', function(event) {
+        const form = event.target;
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Добавляем классы для отображения ошибок
+            Array.from(form.elements).forEach(element => {
+                if (element.required && !element.value) {
+                    element.classList.add('is-invalid');
+                }
+            });
+        }
+
+        form.classList.add('was-validated');
+    });
+
+    // Убираем сообщения об ошибках при вводе
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.addEventListener('input', function() {
+            if (this.value) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+</script>
+</body>
+</html>

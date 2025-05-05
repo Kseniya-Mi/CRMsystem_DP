@@ -1,13 +1,14 @@
 package org.example.crmsystem_dp.repository;
 
 import org.example.crmsystem_dp.entities.Orders;
-import org.example.crmsystem_dp.entities.Users;
 import org.example.crmsystem_dp.interfaces.DataAccessObject;
 import org.example.crmsystem_dp.mappers.OrderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDate;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,13 @@ public class OrdersRepository implements DataAccessObject<Orders> {
     @Override
     public void save(Orders order) {
         jdbcTemplate.update(
-                "INSERT INTO orders (customer_id, executor_id, description, status) VALUES (?, ?, ?, ?)",
+                "INSERT INTO orders (description, status, customer_id, executor_id, date, sum) VALUES ( ?, ?, ?,?,?,?)",
+                order.getDescription(),
+                order.getStatus().name(),
                 order.getCustomer(),
                 order.getExecutor(),
-                order.getDescription(),
-                order.getStatus()
+                order.getDate(),
+                order.getSum()
         );
     }
 
@@ -47,11 +50,14 @@ public class OrdersRepository implements DataAccessObject<Orders> {
     @Override
     public void update(Long id, Orders order) {
         jdbcTemplate.update(
-                "UPDATE orders SET customer_id = ?, executor_id = ?, description = ?, status = ? WHERE id = ?",
+                "UPDATE orders SET description = ?, status = ?, customer_id = ?, executor_id = ?, date = ?, sum = ? WHERE id = ?",
+
+                order.getDescription(),
+                order.getStatus().name(),
                 order.getCustomer(),
                 order.getExecutor(),
-                order.getDescription(),
-                order.getStatus(),
+                order.getDate(),
+                order.getSum(),
                 id
         );
     }
@@ -76,6 +82,14 @@ public class OrdersRepository implements DataAccessObject<Orders> {
 
     public List<Orders> findByCustomerId(Long customerId) {
         return jdbcTemplate.query("SELECT * FROM orders WHERE customer_id = ?", rowMapper, customerId);
+    }
+
+    public List<Orders> findByStatus(Orders.OrderStatus status) {
+        return jdbcTemplate.query("SELECT * FROM orders WHERE status = ?", rowMapper, status);
+    }
+
+    public List<Orders> findByDate(LocalDate date){
+        return jdbcTemplate.query("SELECT * FROM orders WHERE date = ?", rowMapper, date);
     }
 }
 

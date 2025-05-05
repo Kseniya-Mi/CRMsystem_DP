@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Entity
 @Setter
 @Getter
@@ -16,19 +19,24 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customers customer;
+    @Column(name = "customer_id", nullable = false)
+    private Long customer;
 
-    @ManyToOne
-    @JoinColumn(name = "executor_id", nullable = false)
-    private Executors executor;
+    @Column(name = "executor_id", nullable = false)
+    private Long executor;
 
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "status", nullable = false)
-    private OrderStatus status = OrderStatus.NEW;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR(20) NOT NULL")
+    private OrderStatus status= OrderStatus.NEW;;
+
+    @Column(name = "date")
+    private LocalDate date;
+
+    @Column(name = "sum")
+    private Double sum;
 
     public enum OrderStatus {
         NEW, IN_PROGRESS, COMPLETED, CANCELLED

@@ -14,16 +14,16 @@ public class Customers {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private String status; // Например, "Активный", "Неактивный"
 
     public Customers() {}

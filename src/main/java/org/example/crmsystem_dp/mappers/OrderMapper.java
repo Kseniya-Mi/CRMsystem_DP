@@ -15,10 +15,12 @@ public class OrderMapper implements RowMapper<Orders> {
     public Orders mapRow(ResultSet rs, int rowNum) throws SQLException {
         Orders order = new Orders();
         order.setId(rs.getLong("id"));
-        order.setCustomer(rs.getObject("customer_id", Customers.class));
-        order.setExecutor(rs.getObject("executor_id", Executors.class));
         order.setDescription(rs.getString("description"));
-        order.setStatus(rs.getObject("status", Orders.OrderStatus.class));
+        order.setStatus(Orders.OrderStatus.valueOf(rs.getString("status")));
+        order.setCustomer(rs.getLong("customer_id"));
+        order.setExecutor(rs.getLong("executor_id"));
+        order.setDate(rs.getDate("date").toLocalDate());
+        order.setSum(rs.getDouble("sum"));
         return order;
     }
 }

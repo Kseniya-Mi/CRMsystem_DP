@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заказы | CRM-mir</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-color: #9c27b0;
+      --light-lavender: #e1bee7;
+      --pale-lavender: #f3e5f5;
+      --white: #ffffff;
+      --dark-purple: #7b1fa2;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--white);
+    }
+
+    .order-card {
+      border: none;
+      border-radius: 10px;
+      transition: transform 0.3s;
+      background-color: var(--white);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .order-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .status-NEW { border-left-color: var(--primary-color); }
+    .status-IN_PROGRESS { border-left-color: #ffc107; }
+    .status-COMPLETED { border-left-color: #198754; }
+    .status-CANCELLED { border-left-color: #dc3545; }
+
+    .badge-NEW { background-color: var(--primary-color); }
+    .badge-IN_PROGRESS { background-color: #ffc107; }
+    .badge-COMPLETED { background-color: #198754; }
+    .badge-CANCELLED { background-color: #dc3545; }
+
+    .nav-link {
+      color: var(--dark-purple);
+      font-weight: 500;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary-color);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.5rem 1.5rem;
+    }
+
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .footer {
+      background-color: var(--dark-purple);
+      color: white;
+      padding: 2rem 0;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 3rem;
+      height: 3rem;
+    }
+  </style>
+</head>
+<body>
+<!-- Навигация -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="#" style="color: var(--primary-color); font-weight: 600;">
+      <i class="bi bi-flower1 me-2"></i>CRM-mir
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/main">Главная</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/service">Услуги</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/orders">Заказы</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Контакты</a>
+        </li>
+        <li class="nav-item ms-lg-3">
+          <a class="btn btn-outline-primary" href="/logout">Выйти</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Основной контент -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 style="color: var(--dark-purple);">Управление заказами</h2>
+      <div>
+        <a href="/orders/create" class="btn btn-primary me-2">
+          <i class="bi bi-plus-circle me-1"></i> Создать заказ
+        </a>
+        <div class="spinner-border text-primary loading-spinner" role="status">
+          <span class="visually-hidden">Загрузка...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Фильтры и поиск -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3 mb-md-0">
+            <label for="statusFilter" class="form-label">Статус</label>
+            <select class="form-select" id="statusFilter">
+              <option value="">Все статусы</option>
+              <option th:each="status : ${statuses}"
+                      th:value="${status}"
+                      th:text="${#strings.capitalize(#strings.replace(status, '_', ' '))}"></option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3 mb-md-0">
+            <label for="dateFilter" class="form-label">Дата</label>
+            <input type="date" class="form-control" id="dateFilter">
+          </div>
+          <div class="col-md-4">
+            <label for="searchInput" class="form-label">Поиск</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="searchInput" placeholder="ID, клиент или исполнитель">
+              <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Список заказов -->
+    <div id="ordersContainer">
+      <div class="row" th:if="${not #lists.isEmpty(orders)}">
+        <div class="col-12" th:each="order : ${orders}">
+          <div class="card order-card mb-4 status-${order.status}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                Заказ #<span th:text="${order.id}"></span>
+                <span class="badge rounded-pill ms-2"
+                      th:classappend="'badge-' + ${order.status}"
+                      th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}"></span>
+              </h5>
+              <div class="d-flex">
+                <span th:text="${#temporals.format(order.date, 'dd.MM.yyyy')}"></span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <p class="mb-2"><strong>Клиент:</strong> <span th:text="${order.customer}"></span></p>
+                 <!-- <p class="mb-2"><strong>Телефон:</strong> <span th:text="${order.customer.phone}"></span></p>
+                  <p class="mb-0"><strong>Email:</strong> <span th:text="${order.customer.email ?: 'Не указан'}"></span></p> -->
+                </div>
+                <div class="col-md-4">
+                  <p class="mb-2"><strong>Исполнитель:</strong> <span th:text="${order.executor}"></span></p>
+                 <!-- <p class="mb-0"><strong>Специализация:</strong> <span th:text="${order.executor.specialization}"></span></p> -->
+                </div>
+                <div class="col-md-4">
+                  <p class="mb-2"><strong>Описание:</strong> <span th:text="${order.description}"></span></p>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent d-flex flex-wrap align-items-center">
+              <!-- Подробнее -->
+              <a th:href="@{'/orders/' + ${order.id}}" class="btn btn-sm btn-outline-primary me-2">
+                <i class="bi bi-eye me-1"></i> Подробнее
+              </a>
+
+              <!-- Редактировать -->
+              <a th:href="@{'/orders/edit/' + ${order.id}}" class="btn btn-sm btn-outline-secondary me-2">
+                <i class="bi bi-pencil me-1"></i> Редактировать
+              </a>
+
+              <!-- Удалить -->
+              <form th:action="@{/orders/delete/{id}(id=${order.id})}" method="post" class="me-2">
+                <button type="submit" class="btn btn-sm btn-outline-danger"
+                        th:disabled="${order.status == T(org.example.crmsystem_dp.entities.Orders.OrderStatus).COMPLETED or
+                         order.status == T(org.example.crmsystem_dp.entities.Orders.OrderStatus).CANCELLED}"
+                        onclick="return confirm('Вы точно хотите удалить заказ #${order.id}?')">
+                  <i class="bi bi-trash me-1"></i> Удалить
+                </button>
+              </form>
+
+              <!-- Статус -->
+              <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-gear me-1"></i> Статус
+                </button>
+                <ul class="dropdown-menu">
+                  <li th:each="status : ${T(org.example.crmsystem_dp.entities.Orders.OrderStatus).values()}">
+                    <a class="dropdown-item status-change"
+                       th:data-id="${order.id}"
+                       th:data-status="${status}"
+                       th:text="${#strings.capitalize(#strings.replace(status.name(), '_', ' '))}"></a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пустой список -->
+      <div class="row" th:if="${#lists.isEmpty(orders)}">
+        <div class="col-12">
+          <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle me-2"></i> Нет заказов, соответствующих критериям поиска
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Пагинация -->
+    <nav th:if="${totalPages > 1}" aria-label="Page navigation">
+      <ul class="pagination justify-content-center" id="pagination">
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+          <a class="page-link" th:href="@{/orders(page=1)}">Первая</a>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+          <a class="page-link" th:href="@{/orders(page=${currentPage})}">Назад</a>
+        </li>
+
+        <li th:each="page : ${#numbers.sequence(1, totalPages)}"
+            class="page-item" th:classappend="${page == currentPage} ? 'active'">
+          <a class="page-link" th:href="@{/orders(page=${page})}" th:text="${page}"></a>
+        </li>
+
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+          <a class="page-link" th:href="@{/orders(page=${currentPage+1})}">Вперед</a>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+          <a class="page-link" th:href="@{/orders(page=${totalPages})}">Последняя</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<!-- Подвал -->
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h5>CRM-mir</h5>
+        <p>Профессиональные решения для вашего бизнеса</p>
+      </div>
+      <div class="col-md-2 mb-4 mb-md-0">
+        <h5>Меню</h5>
+        <ul class="list-unstyled">
+          <li><a href="/main" class="text-white">Главная</a></li>
+          <li><a href="/service" class="text-white">Услуги</a></li>
+          <li><a href="/orders" class="text-white">Заказы</a></li>
+          <li><a href="#" class="text-white">Контакты</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h5>Контакты</h5>
+        <ul class="list-unstyled">
+          <li><i class="bi bi-geo-alt me-2"></i> г. Минск</li>
+          <li><i class="bi bi-telephone me-2"></i> +375 (29) 289-78-90</li>
+          <li><i class="bi bi-envelope me-2"></i> info@crm-mir.by</li>
+        </ul>
+      </div>
+      <div class="col-md-2">
+        <h5>Соцсети</h5>
+        <div class="d-flex gap-3">
+          <a href="#" class="text-white"><i class="bi bi-facebook fs-4"></i></a>
+          <a href="#" class="text-white"><i class="bi bi-instagram fs-4"></i></a>
+          <a href="#" class="text-white"><i class="bi bi-telegram fs-4"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Модальные окна -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Подтверждение удаления</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Вы уверены, что хотите удалить этот заказ? Это действие нельзя отменить.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">Удалить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Изменение статуса</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Вы действительно хотите изменить статус заказа?</p>
+        <p>Новый статус: <strong id="newStatusText"></strong></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="confirmStatusChange">Изменить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const loadingSpinner = document.querySelector('.loading-spinner');
+    const ordersContainer = document.getElementById('ordersContainer');
+    const deleteModal = new bootstrap.Modal('#deleteModal');
+    const statusModal = new bootstrap.Modal('#statusModal');
+
+    let currentOrderId = null;
+    let newStatus = null;
+
+    // Удаление заказа
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentOrderId = this.getAttribute('data-id');
+        deleteModal.show();
+      });
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+      toggleLoading(true);
+      axios.delete(`/api/orders/${currentOrderId}`)
+              .then(response => {
+                window.location.reload();
+              })
+              .catch(error => {
+                alert('Ошибка при удалении заказа: ' + error.response.data.message);
+              })
+              .finally(() => {
+                toggleLoading(false);
+                deleteModal.hide();
+              });
+    });
+
+    // Изменение статуса
+    document.querySelectorAll('.status-change').forEach(item => {
+      item.addEventListener('click', function() {
+        currentOrderId = this.getAttribute('data-id');
+        newStatus = this.getAttribute('data-status');
+        document.getElementById('newStatusText').textContent =
+                this.textContent.trim();
+        statusModal.show();
+      });
+    });
+
+    document.getElementById('confirmStatusChange').addEventListener('click', function() {
+      toggleLoading(true);
+      axios.patch(`/api/orders/${currentOrderId}/status?status=${newStatus}`)
+              .then(response => {
+                window.location.reload();
+              })
+              .catch(error => {
+                alert('Ошибка при изменении статуса: ' + error.response.data.message);
+              })
+              .finally(() => {
+                toggleLoading(false);
+                statusModal.hide();
+              });
+    });
+
+    // Фильтрация и поиск
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('dateFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') applyFilters();
+    });
+    document.getElementById('searchButton').addEventListener('click', applyFilters);
+
+    function applyFilters() {
+      const status = document.getElementById('statusFilter').value;
+      const date = document.getElementById('dateFilter').value;
+      const search = document.getElementById('searchInput').value;
+
+      let url = '/orders?';
+      if (status) url += `status=${status}&`;
+      if (date) url += `date=${date}&`;
+      if (search) url += `search=${encodeURIComponent(search)}&`;
+
+      window.location.href = url.slice(0, -1); // Удаляем последний &
+    }
+
+    function toggleLoading(show) {
+      loadingSpinner.style.display = show ? 'inline-block' : 'none';
+    }
+  });
+</script>
+</body>
+</html>
