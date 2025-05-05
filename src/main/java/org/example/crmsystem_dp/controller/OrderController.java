@@ -36,7 +36,7 @@ public class OrderController {
     @GetMapping
     public String getAllOrders(Model model) {
         List<Orders> orders = ordersService.getAllOrders();
-        model.addAttribute("statuses", Arrays.asList("NEW", "IN_PROGRESS", "COMPLETED", "CANCELLED"));
+        model.addAttribute("statuses", Orders.OrderStatus.values());
         model.addAttribute("orders", orders); // Добавляем заказы в модель
         return "orders"; // Возвращаем view для отображения
     }
@@ -45,9 +45,9 @@ public class OrderController {
     @GetMapping("/{id}")
     public String getOrderById(@PathVariable Long id, Model model) {
         Optional<Orders> order = ordersService.getOrderById(id);
-        model.addAttribute("statuses", Arrays.asList("NEW", "IN_PROGRESS", "COMPLETED", "CANCELLED"));
+        model.addAttribute("statuses", Orders.OrderStatus.values());
         order.ifPresent(o -> model.addAttribute("order", o)); // Добавляем в модель, если заказ найден
-        return "orderDetails"; // Страница с деталями заказа
+        return "orders"; // Страница с деталями заказа
     }
 
     // Получение заказов по статусу

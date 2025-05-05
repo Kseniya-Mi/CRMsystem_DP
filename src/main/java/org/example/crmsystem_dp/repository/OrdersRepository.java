@@ -85,7 +85,7 @@ public class OrdersRepository implements DataAccessObject<Orders> {
     }
 
     public List<Orders> findByStatus(Orders.OrderStatus status) {
-        return jdbcTemplate.query("SELECT * FROM orders WHERE status = ?", rowMapper, status);
+        return jdbcTemplate.query("SELECT * FROM orders WHERE status = ?", rowMapper, status.toString());
     }
 
     public List<Orders> findByDate(LocalDate date){
