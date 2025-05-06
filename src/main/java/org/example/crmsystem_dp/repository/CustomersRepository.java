@@ -86,4 +86,11 @@ public class CustomersRepository implements DataAccessObject<Customers> {
             return Optional.empty();
         }
     }
+
+    public Object countActiveCustomers() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM customers WHERE status = 'Active'",
+                Integer.class
+        );
+    }
 }

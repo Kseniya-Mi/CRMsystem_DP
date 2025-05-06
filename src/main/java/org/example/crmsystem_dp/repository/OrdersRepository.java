@@ -5,6 +5,8 @@ import org.example.crmsystem_dp.interfaces.DataAccessObject;
 import org.example.crmsystem_dp.mappers.OrderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
@@ -91,6 +93,32 @@ public class OrdersRepository implements DataAccessObject<Orders> {
     public List<Orders> findByDate(LocalDate date){
         return jdbcTemplate.query("SELECT * FROM orders WHERE date = ?", rowMapper, date);
     }
+
+    public List<Orders> findTop3ByOrderByCreatedAtDesc() {
+        return jdbcTemplate.query("SELECT * FROM orders ORDER BY date DESC LIMIT 3", rowMapper);
+    }
+
+    public Long count() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders", Long.class);
+    }
+
+    public Double getTotalRevenue() {
+        return jdbcTemplate.queryForObject("SELECT SUM(sum) FROM orders", Double.class);
+    }
+
+    // Получение статистики по всем статусам
+    public List<OrderStatusStat> getOrderStatusStats() {
+        String sql = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new OrderStatusStat(
+                        Orders.OrderStatus.valueOf(rs.getString("status")),
+                        rs.getLong("count")
+                )
+        );
+    }
+
+    // DTO для статистики по статусам
+    record OrderStatusStat(Orders.OrderStatus status, long count) {}
 }
 
 

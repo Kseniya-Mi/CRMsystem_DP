@@ -77,6 +77,30 @@
             border-color: var(--primary-color);
             color: white;
         }
+
+        .badge-status-new {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .badge-status-in_progress {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .badge-status-completed {
+            background-color: #198754;
+            color: #fff;
+        }
+        .badge-status-cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .badge {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 0.35em 0.65em;
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
@@ -129,39 +153,30 @@
 
             <!-- Статистика -->
             <div class="row mb-4">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card stat-card h-100">
                         <div class="card-body">
                             <i class="bi bi-people icon"></i>
                             <h6 class="card-subtitle mb-2 text-muted">Клиенты</h6>
-                            <h3 class="card-title">124</h3>
+                            <h3 class="card-title" th:text="${stats.clientCount}">0</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card stat-card h-100">
                         <div class="card-body">
                             <i class="bi bi-cart icon"></i>
                             <h6 class="card-subtitle mb-2 text-muted">Заказы</h6>
-                            <h3 class="card-title">42</h3>
+                            <h3 class="card-title" th:text="${stats.orderCount}">0</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card stat-card h-100">
                         <div class="card-body">
                             <i class="bi bi-currency-dollar icon"></i>
                             <h6 class="card-subtitle mb-2 text-muted">Доход</h6>
-                            <h3 class="card-title">$8,540</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card stat-card h-100">
-                        <div class="card-body">
-                            <i class="bi bi-chat-dots icon"></i>
-                            <h6 class="card-subtitle mb-2 text-muted">Заявки</h6>
-                            <h3 class="card-title">7</h3>
+                            <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(stats.totalRevenue, 1, 2)}">$0</h3>
                         </div>
                     </div>
                 </div>
@@ -187,26 +202,24 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>15482</td>
-                                <td>Иванов И.</td>
-                                <td>02.05.2025</td>
-                                <td>$1,200</td>
-                                <td><span class="badge bg-warning">В обработке</span></td>
+                            <tr th:each="order : ${latestOrders}">
+                                <td th:text="${order.id}"></td>
+                                <td th:text="${order.customer}"></td>
+                                <td th:text="${#temporals.format(order.date, 'dd.MM.yyyy')}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(order.sum, 1, 2)}"></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1">Просмотр</button>
-                                    <button class="btn btn-sm btn-outline-success">Принять</button>
+                            <span class="badge rounded-pill ms-2"
+                                  th:classappend="'badge-status-' + ${#strings.toLowerCase(order.status.name())}"
+                                  th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}"></span>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td>15481</td>
-                                <td>Петрова А.</td>
-                                <td>01.05.2025</td>
-                                <td>$850</td>
-                                <td><span class="badge bg-info">В работе</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1">Просмотр</button>
-                                    <button class="btn btn-sm btn-outline-success">Завершить</button>
+                                    <a th:href="@{'/orders/' + ${order.id}}"
+                                       class="btn btn-sm btn-outline-primary me-1">Просмотр</a>
+                                    <a th:if="${order.status != 'COMPLETED'}"
+                                       th:href="@{'/orders/' + ${order.id} + '/complete'}"
+                                       class="btn btn-sm btn-outline-success">
+                                        <span th:text="${order.status == 'IN_PROGRESS'} ? 'Завершить' : 'Принять'"></span>
+                                    </a>
                                 </td>
                             </tr>
                             </tbody>

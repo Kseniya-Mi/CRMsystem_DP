@@ -80,6 +80,13 @@ public class ExecutorsRepository implements DataAccessObject<Executors> {
     public List<Executors> findBySkills(String skill) {
         return jdbcTemplate.query("SELECT * FROM executors WHERE skills LIKE ?", rowMapper, "%" + skill + "%");
     }
+
+    public Object count() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM executors",
+                Integer.class
+        );
+    }
 }
 
 

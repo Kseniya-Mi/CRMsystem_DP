@@ -1,6 +1,7 @@
 package org.example.crmsystem_dp.service;
 
 import org.example.crmsystem_dp.entities.Orders;
+import org.example.crmsystem_dp.interfaces.OrderStatusProjection;
 import org.example.crmsystem_dp.repository.OrdersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,4 +48,9 @@ public class OrdersService {
         public void deleteOrder(Long id) {
             ordersRepository.deleteById(id);
         }
+
+    public List<Orders> getLatestOrders(int i) {
+            return ordersRepository.findTop3ByOrderByCreatedAtDesc();
+    }
+
 }
