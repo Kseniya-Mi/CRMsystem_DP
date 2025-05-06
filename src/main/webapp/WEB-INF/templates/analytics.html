@@ -103,17 +103,6 @@
             color: var(--primary-color);
             opacity: 0.7;
         }
-
-        .stats-table {
-            margin-top: 20px;
-        }
-        .stats-table th {
-            background-color: var(--light-lavender);
-        }
-        .total-row {
-            background-color: var(--pale-lavender);
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -175,7 +164,7 @@
                         <div class="card-body">
                             <i class="bi bi-currency-dollar icon-purple fs-3 mb-2"></i>
                             <h6 class="card-subtitle mb-2 text-muted">Общий доход</h6>
-                            <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}">$0</h3>
+                            <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(sum, 1, 2)}">$0</h3>
                         </div>
                     </div>
                 </div>
@@ -199,9 +188,8 @@
                 </div>
             </div>
 
-            <!-- Статистика по статусам -->
             <div class="row mb-4">
-                <div class="col-md-12">
+                <div class="col-md-12 mb-3">  <!-- Изменили col-md-6 на col-md-12 для полной ширины -->
                     <div class="card h-100">
                         <div class="card-header bg-white">
                             <h5 class="mb-0 text-purple">Статистика по статусам заказов</h5>
@@ -210,41 +198,98 @@
                             <div class="chart-container">
                                 <canvas id="statusChart"></canvas>
                             </div>
-                            <div class="table-responsive stats-table">
-                                <table class="table table-bordered">
-                                    <thead>
-                                    <tr>
-                                        <th>Статус</th>
-                                        <th>Количество</th>
-                                        <th>Доля</th>
-                                        <th>Доход</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="stat : ${statusStats}">
-                                        <td>
-                                                <span class="badge rounded-pill"
-                                                      th:classappend="'badge-status-' + ${#strings.toLowerCase(stat.status.name())}"
-                                                      th:text="${#strings.capitalize(#strings.replace(stat.status.name(), '_', ' '))}">
-                                                </span>
-                                        </td>
-                                        <td th:text="${stat.count}"></td>
-                                        <td th:text="${#numbers.formatDecimal(stat.count/totalOrders*100, 1, 2) + '%'}"></td>
-                                        <td th:text="${'$' + #numbers.formatDecimal(stat.revenue, 1, 2)}"></td>
-                                    </tr>
-                                    <tr class="total-row">
-                                        <td><strong>Итого</strong></td>
-                                        <td th:text="${totalOrders}"></td>
-                                        <td>100%</td>
-                                        <td th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}"></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
+
+            <script th:inline="javascript">
+                // График статусов заказов с доходами
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                const statusStats = /*[[${statusStats}]]*/ [];
+                const totalOrders = /*[[${totalOrders}]]*/ 0;
+                const totalRevenue = /*[[${totalRevenue}]]*/ 0;
+
+                // Подготовка данных
+                const statusLabels = statusStats.map(stat =>
+                    `${stat.status.toString().replace('_', ' ')} (${Math.round(stat.count/totalOrders*100)}%)`
+                );
+
+                const statusCounts = statusStats.map(stat => stat.count);
+                const statusRevenues = statusStats.map(stat => stat.revenue);
+
+                // Создаем комбинированную диаграмму
+                new Chart(statusCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [
+                            {
+                                label: 'Количество заказов',
+                                data: statusCounts,
+                                backgroundColor: 'rgba(156, 39, 176, 0.6)',
+                                borderColor: 'rgba(156, 39, 176, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Доход ($)',
+                                data: statusRevenues,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                type: 'line',
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Количество заказов'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Доход ($)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.datasetIndex === 0) {
+                                            label += context.raw + ' зак.';
+                                        } else {
+                                            label += '$' + context.raw.toFixed(2);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
 
             <!-- Последние заказы -->
             <div class="card mb-4">
@@ -273,10 +318,9 @@
                                 <td th:text="${#temporals.format(order.date, 'dd.MM.yyyy')}"></td>
                                 <td th:text="${'$' + #numbers.formatDecimal(order.sum, 1, 2)}"></td>
                                 <td>
-                                    <span class="badge rounded-pill ms-2"
-                                          th:classappend="'badge-status-' + ${#strings.toLowerCase(order.status.name())}"
-                                          th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}">
-                                    </span>
+                                         <span class="badge rounded-pill ms-2"
+                                               th:classappend="'badge-status-' + ${#strings.toLowerCase(order.status.name())}"
+                                               th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}"></span>
                                 </td>
                             </tr>
                             </tbody>
@@ -291,35 +335,38 @@
 <script th:inline="javascript">
     // График статусов заказов
     const statusCtx = document.getElementById('statusChart').getContext('2d');
+
+    // Получаем данные из модели Thymeleaf
     const statusStats = /*[[${statusStats}]]*/ [];
     const totalOrders = /*[[${totalOrders}]]*/ 0;
 
-    // Подготовка данных
-    const labels = statusStats.map(stat => {
-        const statusName = stat.status.toString().replace('_', ' ').toLowerCase();
-        return statusName.charAt(0).toUpperCase() + statusName.slice(1);
+    // Подготавливаем данные для графика
+    const statusLabels = statusStats.map(order => {
+        // Преобразуем название статуса (NEW -> "Новый")
+        const statusNames = {
+            'NEW': 'Новые',
+            'IN_PROGRESS': 'В работе',
+            'COMPLETED': 'Завершенные',
+            'CANCELLED': 'Отмененные'
+        };
+        return statusNames[order.status.name()] || order.status.name();
     });
 
-    const data = statusStats.map(stat => stat.count);
-    const percentages = statusStats.map(stat => Math.round((stat.count / totalOrders) * 100));
-    const revenues = statusStats.map(stat => stat.revenue);
-
-    // Цвета для статусов
-    const backgroundColors = [
-        'rgba(255, 193, 7, 0.7)',   // NEW
-        'rgba(13, 202, 240, 0.7)',  // IN_PROGRESS
-        'rgba(25, 135, 84, 0.7)',    // COMPLETED
-        'rgba(220, 53, 69, 0.7)'     // CANCELLED
-    ];
+    const statusData = statusStats.map(order => order.getSum()); // Используем sum для хранения количества
 
     // Создаем диаграмму
     new Chart(statusCtx, {
         type: 'doughnut',
         data: {
-            labels: labels,
+            labels: statusLabels,
             datasets: [{
-                data: data,
-                backgroundColor: backgroundColors,
+                data: statusData,
+                backgroundColor: [
+                    'rgba(255, 193, 7, 0.7)',   // NEW - желтый
+                    'rgba(13, 202, 240, 0.7)',  // IN_PROGRESS - синий
+                    'rgba(25, 135, 84, 0.7)',   // COMPLETED - зеленый
+                    'rgba(220, 53, 69, 0.7)'    // CANCELLED - красный
+                ],
                 borderWidth: 1
             }]
         },
@@ -329,36 +376,21 @@
             plugins: {
                 legend: {
                     position: 'right',
-                    labels: {
-                        generateLabels: function(chart) {
-                            const data = chart.data;
-                            return data.labels.map((label, i) => ({
-                                text: `${label} (${percentages[i]}%)`,
-                                fillStyle: data.datasets[0].backgroundColor[i],
-                                hidden: false,
-                                index: i
-                            }));
-                        }
-                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const label = context.label || '';
                             const value = context.raw || 0;
-                            const percentage = percentages[context.dataIndex];
-                            const revenue = revenues[context.dataIndex];
-                            return [
-                                `${label}: ${value} заказов`,
-                                `Доля: ${percentage}%`,
-                                `Доход: $${revenue.toFixed(2)}`
-                            ];
+                            const percentage = Math.round((value / totalOrders) * 100);
+                            return `${label}: ${value} ${percentage}`;
                         }
                     }
                 }
             }
         }
     });
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
