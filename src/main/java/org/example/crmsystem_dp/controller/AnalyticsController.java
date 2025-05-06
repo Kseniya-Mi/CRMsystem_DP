@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/analytics")
 public class AnalyticsController {
@@ -40,7 +42,7 @@ public class AnalyticsController {
 
         model.addAttribute("order", new Orders());
 
-        List<OrdersRepository.OrderStatusStat> statusStats = orderRepository.getOrderStatusStats();
+        List<Orders> statusStats = orderRepository.getOrderStatusStats();
         model.addAttribute("statusStats", statusStats);
 
         // Последние заказы

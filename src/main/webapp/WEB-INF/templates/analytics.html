@@ -103,6 +103,17 @@
             color: var(--primary-color);
             opacity: 0.7;
         }
+
+        .stats-table {
+            margin-top: 20px;
+        }
+        .stats-table th {
+            background-color: var(--light-lavender);
+        }
+        .total-row {
+            background-color: var(--pale-lavender);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -164,7 +175,7 @@
                         <div class="card-body">
                             <i class="bi bi-currency-dollar icon-purple fs-3 mb-2"></i>
                             <h6 class="card-subtitle mb-2 text-muted">Общий доход</h6>
-                            <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(sum, 1, 2)}">$0</h3>
+                            <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}">$0</h3>
                         </div>
                     </div>
                 </div>
@@ -188,28 +199,47 @@
                 </div>
             </div>
 
-            <!-- Графики -->
+            <!-- Статистика по статусам -->
             <div class="row mb-4">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12">
                     <div class="card h-100">
                         <div class="card-header bg-white">
-                            <h5 class="mb-0 text-purple">Статусы заказов</h5>
+                            <h5 class="mb-0 text-purple">Статистика по статусам заказов</h5>
                         </div>
                         <div class="card-body">
                             <div class="chart-container">
                                 <canvas id="statusChart"></canvas>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card h-100">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0 text-purple">Доход по месяцам</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="revenueChart"></canvas>
+                            <div class="table-responsive stats-table">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Статус</th>
+                                        <th>Количество</th>
+                                        <th>Доля</th>
+                                        <th>Доход</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="stat : ${statusStats}">
+                                        <td>
+                                                <span class="badge rounded-pill"
+                                                      th:classappend="'badge-status-' + ${#strings.toLowerCase(stat.status.name())}"
+                                                      th:text="${#strings.capitalize(#strings.replace(stat.status.name(), '_', ' '))}">
+                                                </span>
+                                        </td>
+                                        <td th:text="${stat.count}"></td>
+                                        <td th:text="${#numbers.formatDecimal(stat.count/totalOrders*100, 1, 2) + '%'}"></td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(stat.revenue, 1, 2)}"></td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td><strong>Итого</strong></td>
+                                        <td th:text="${totalOrders}"></td>
+                                        <td>100%</td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(totalRevenue, 1, 2)}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -243,9 +273,10 @@
                                 <td th:text="${#temporals.format(order.date, 'dd.MM.yyyy')}"></td>
                                 <td th:text="${'$' + #numbers.formatDecimal(order.sum, 1, 2)}"></td>
                                 <td>
-                                         <span class="badge rounded-pill ms-2"
-                                               th:classappend="'badge-status-' + ${#strings.toLowerCase(order.status.name())}"
-                                               th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}"></span>
+                                    <span class="badge rounded-pill ms-2"
+                                          th:classappend="'badge-status-' + ${#strings.toLowerCase(order.status.name())}"
+                                          th:text="${#strings.capitalize(#strings.replace(order.status.name(), '_', ' '))}">
+                                    </span>
                                 </td>
                             </tr>
                             </tbody>
@@ -260,76 +291,70 @@
 <script th:inline="javascript">
     // График статусов заказов
     const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusStats = /*[[${statusStats}]]*/ [];
+    const totalOrders = /*[[${totalOrders}]]*/ 0;
+
+    // Подготовка данных
+    const labels = statusStats.map(stat => {
+        const statusName = stat.status.toString().replace('_', ' ').toLowerCase();
+        return statusName.charAt(0).toUpperCase() + statusName.slice(1);
+    });
+
+    const data = statusStats.map(stat => stat.count);
+    const percentages = statusStats.map(stat => Math.round((stat.count / totalOrders) * 100));
+    const revenues = statusStats.map(stat => stat.revenue);
+
+    // Цвета для статусов
+    const backgroundColors = [
+        'rgba(255, 193, 7, 0.7)',   // NEW
+        'rgba(13, 202, 240, 0.7)',  // IN_PROGRESS
+        'rgba(25, 135, 84, 0.7)',    // COMPLETED
+        'rgba(220, 53, 69, 0.7)'     // CANCELLED
+    ];
+
+    // Создаем диаграмму
     new Chart(statusCtx, {
         type: 'doughnut',
         data: {
-            labels: /*[[${statusStats.![status.name()}]]*/,
+            labels: labels,
             datasets: [{
-                data: /*[[${statusStats.![count}]]*/,
-                backgroundColor: [
-                    'rgba(255, 193, 7, 0.7)',   // NEW
-                    'rgba(13, 202, 240, 0.7)',  // IN_PROGRESS
-                    'rgba(25, 135, 84, 0.7)',   // COMPLETED
-                    'rgba(220, 53, 69, 0.7)'    // CANCELLED
-                ],
+                data: data,
+                backgroundColor: backgroundColors,
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-
-    // График дохода по месяцам
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: /*[[${monthlyRevenue.![monthName}]]*/,
-            datasets: [{
-                label: 'Доход',
-                data: /*[[${monthlyRevenue.![revenue}]]*/,
-                backgroundColor: 'rgba(156, 39, 176, 0.1)',
-                borderColor: 'rgba(156, 39, 176, 1)',
-                borderWidth: 2,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // График дохода по месяцам
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: /*[[${monthlyRevenue.![monthName}]]*/,
-            datasets: [{
-                label: 'Доход',
-                data: /*[[${monthlyRevenue.![revenue}]]*/,
-                backgroundColor: 'rgba(156, 39, 176, 0.1)',
-                borderColor: 'rgba(156, 39, 176, 1)',
-                borderWidth: 2,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            return data.labels.map((label, i) => ({
+                                text: `${label} (${percentages[i]}%)`,
+                                fillStyle: data.datasets[0].backgroundColor[i],
+                                hidden: false,
+                                index: i
+                            }));
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const percentage = percentages[context.dataIndex];
+                            const revenue = revenues[context.dataIndex];
+                            return [
+                                `${label}: ${value} заказов`,
+                                `Доля: ${percentage}%`,
+                                `Доход: $${revenue.toFixed(2)}`
+                            ];
+                        }
+                    }
                 }
             }
         }

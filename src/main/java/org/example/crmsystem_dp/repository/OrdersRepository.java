@@ -107,18 +107,16 @@ public class OrdersRepository implements DataAccessObject<Orders> {
     }
 
     // Получение статистики по всем статусам
-    public List<OrderStatusStat> getOrderStatusStats() {
+    public List<Orders> getOrderStatusStats() {
         String sql = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new OrderStatusStat(
-                        Orders.OrderStatus.valueOf(rs.getString("status")),
-                        rs.getLong("count")
-                )
-        );
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Orders order = new Orders();
+            order.setStatus(Orders.OrderStatus.valueOf(rs.getString("status")));
+            // Используем поле sum для хранения количества (временно)
+            order.setSum(rs.getDouble("count"));
+            return order;
+        });
     }
-
-    // DTO для статистики по статусам
-    record OrderStatusStat(Orders.OrderStatus status, long count) {}
 }
 
 
